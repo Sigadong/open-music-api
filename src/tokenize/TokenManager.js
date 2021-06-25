@@ -7,12 +7,8 @@ const TokenManager = {
   verifyRefreshToken: (refreshToken) => {
     try {
       const artifacts = Jwt.token.decode(refreshToken);
-      console.log(`artifacts: ${artifacts}`);
-
       Jwt.token.verifySignature(artifacts, process.env.REFRESH_TOKEN_KEY);
       const { payload } = artifacts.decoded;
-      console.log(`artifacts.decoded: ${artifacts.decoded}`);
-
       return payload;
     } catch (error) {
       throw new InvariantError('Refresh token tidak valid');

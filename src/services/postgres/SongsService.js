@@ -30,7 +30,7 @@ class SongsService {
 
   async getSongs() {
     const result = await this._pool.query('SELECT * FROM songs');
-    return result.rows.map(mapDBToModel.modelPlaylists);
+    return result.rows.map(mapDBToModel.modelSongs);
   }
 
   async getSongById(id) {
@@ -44,7 +44,7 @@ class SongsService {
       throw new NotFoundError('Song not found.');
     }
 
-    return result.rows.map(mapDBToModel)[0];
+    return result.rows.map(mapDBToModel.modelSongs)[0];
   }
 
   async editSongById(id, { title, year, performer, genre, duration }) {
