@@ -4,7 +4,7 @@ const routes = (handler) => [
     path: '/playlists',
     handler: handler.postPlaylistHandler,
     options: {
-      auth: 'openmusicsapp_jwt',
+      auth: 'openmusic_jwt',
     },
   },
   {
@@ -12,7 +12,7 @@ const routes = (handler) => [
     path: '/playlists',
     handler: handler.getPlaylistsHandler,
     options: {
-      auth: 'openmusicsapp_jwt',
+      auth: 'openmusic_jwt',
     },
   },
   {
@@ -20,7 +20,7 @@ const routes = (handler) => [
     path: '/playlists/{playlistId}',
     handler: handler.deletePlaylistHandler,
     options: {
-      auth: 'openmusicsapp_jwt',
+      auth: 'openmusic_jwt',
     },
   },
 

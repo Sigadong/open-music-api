@@ -26,7 +26,9 @@
         "no-await-in-loop": 0,
         "no-unused-vars": 0,
         "camelcase": 0,
+        "max-len": 0,
         "object-curly-newline": 0,
+        "newline-per-chained-call": 0,
         "no-undef": 0
     }
 }

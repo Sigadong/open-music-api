@@ -1,26 +1,32 @@
 const autoBind = require('auto-bind');
 const ClientError = require('../../exceptions/ClientError');
+const NotFoundError = require('../../exceptions/NotFoundError');
 
-class PlaylistsHandler {
-  constructor(service, validator) {
+class PlaylistSongsHandler {
+  constructor(service, playlistsService, validator) {
     this._service = service;
+    this._playlistsService = playlistsService;
     this._validator = validator;
     autoBind(this);
   }
 
-  async postPlaylistHandler(request, h) {
+  async postPlaylistSongsHandler(request, h) {
     try {
-      this._validator.validatePlaylistPayload(request.payload);
-      const { name } = request.payload;
+      const { playlistId, any } = request.params;
+      if (any !== 'songs') {
+        throw new NotFoundError('This is Resource not found !!');
+      }
+
+      this._validator.validatePlaylistSongsPayload(request.payload);
+      const { songId } = request.payload;
       const { id: credentialUserId } = request.auth.credentials;
-      const playlistById = await this._service.addPlaylist({ name, owner: credentialUserId });
+      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialUserId);
+      await this._service.verifyPlaylistSongs({ playlistId, songId });
+      await this._service.addSongToPlaylist({ playlistId, songId });
 
       const response = h.response({
         status: 'success',
-        message: 'Playlist berhasil ditambahkan',
-        data: {
-          playlistId: playlistById,
-        },
+        message: 'Lagu berhasil ditambahkan ke playlist',
       });
       response.code(201);
       return response;
@@ -44,14 +50,21 @@ class PlaylistsHandler {
     }
   }
 
-  async getPlaylistsHandler(request, h) {
+  async getPlaylistSongsHandler(request, h) {
     try {
+      const { playlistId, any } = request.params;
+      if (any !== 'songs') {
+        throw new NotFoundError('This is Resource not found !!');
+      }
+
       const { id: credentialUserId } = request.auth.credentials;
-      const allPlaylist = await this._service.getPlaylists(credentialUserId);
+      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialUserId);
+      const allSong = await this._service.getSongsToPlaylist(credentialUserId);
+
       return {
         status: 'success',
         data: {
-          playlists: allPlaylist,
+          songs: allSong,
         },
       };
     } catch (error) {
@@ -64,6 +77,7 @@ class PlaylistsHandler {
         return response;
       }
 
+      // Server ERROR!
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -74,16 +88,22 @@ class PlaylistsHandler {
     }
   }
 
-  async deletePlaylistHandler(request, h) {
+  async deletePlaylistSongsHandler(request, h) {
     try {
-      const { id } = request.params;
+      const { playlistId, any } = request.params;
+      if (any !== 'songs') {
+        throw new NotFoundError('This is Resource not found !!');
+      }
+
+      this._validator.validatePlaylistSongsPayload(request.payload);
+      const { songId } = request.payload;
       const { id: credentialUserId } = request.auth.credentials;
-      await this._service.verifyPlaylistOwner(id, credentialUserId);
-      await this._service.deletePlaylist(id);
+      await this._playlistsService.verifyPlaylistAccess(playlistId, credentialUserId);
+      await this._service.deleteSongFromPlaylist(playlistId, songId);
 
       return {
         status: 'success',
-        message: 'Playlist berhasil dihapus',
+        message: 'Lagu berhasil dihapus dari Playlist',
       };
     } catch (error) {
       if (error instanceof ClientError) {
@@ -95,6 +115,7 @@ class PlaylistsHandler {
         return response;
       }
 
+      // Server ERROR!
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -106,4 +127,4 @@ class PlaylistsHandler {
   }
 }
 
-module.exports = PlaylistsHandler;
+module.exports = PlaylistSongsHandler;

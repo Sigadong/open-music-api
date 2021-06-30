@@ -1,10 +1,11 @@
+const autoBind = require('auto-bind');
 const ClientError = require('../../exceptions/ClientError');
 
 class UsersHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
-    this.postUserHandler = this.postUserHandler.bind(this);
+    autoBind(this);
   }
 
   async postUserHandler(request, h) {
@@ -32,7 +33,6 @@ class UsersHandler {
         return response;
       }
 
-      // Server ERROR!
       const response = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',

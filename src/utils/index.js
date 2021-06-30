@@ -21,11 +21,12 @@ const mapDBToModel = {
   modelPlaylists: ({
     id,
     name,
-    owner,
+    username,
   }) => ({
     id,
     name,
-    owner,
+    username,
   }),
 };
+
 module.exports = { mapDBToModel };
