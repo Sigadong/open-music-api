@@ -18,7 +18,6 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  // menghapus constraint ffk_playlists.owner_users.id pada tabel playlists
   pgm.dropConstraint('playlists', 'fk_playlists.owner_users.id');
 
   pgm.dropTable('playlists');

@@ -17,12 +17,11 @@ class PlaylistsService {
       text: 'INSERT INTO playlists VALUES($1, $2, $3) RETURNING id',
       values: [id, name, owner],
     };
-
     const result = await this._pool.query(query);
+
     if (!result.rows[0].id) {
       throw new InvariantError('Playlist failed to add.');
     }
-
     return result.rows[0].id;
   }
 
@@ -33,24 +32,20 @@ class PlaylistsService {
       WHERE playlists.owner = $1 OR collaborations.user_id = $1`,
       values: [owner],
     };
-
     const result = await this._pool.query(query);
-    if (!result.rowCount) {
-      throw new NotFoundError('Playlists not found.');
-    }
-
     return result.rows.map(mapDBToModel.modelPlaylists);
   }
 
-  async deletePlaylist(id) {
+  async deletePlaylist(playlistId, credentialUserId) {
+    await this.verifyPlaylistOwner(playlistId, credentialUserId);
     const query = {
       text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
-      values: [id],
+      values: [playlistId],
     };
-
     const result = await this._pool.query(query);
+
     if (!result.rowCount) {
-      throw new NotFoundError('Playlist failed to delete. Id not found.');
+      throw new NotFoundError('Playlist failed to delete. Id not found!');
     }
   }
 
@@ -60,12 +55,14 @@ class PlaylistsService {
       values: [id],
     };
     const result = await this._pool.query(query);
+
     if (!result.rowCount) {
-      throw new NotFoundError('Playlist tidak ditemukan');
+      throw new NotFoundError('Playlist not found!');
     }
+
     const playlist = result.rows[0];
     if (playlist.owner !== owner) {
-      throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
+      throw new AuthorizationError('You are not entitled to access this resource');
     }
   }
 
